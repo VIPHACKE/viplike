@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker Terminal v4.3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0a0a0a;
+            font-family: 'Orbitron', sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        #vanta-bg {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .glitch {
+            color: #ff0000;
+            font-size: clamp(2rem, 5vw, 3rem);
+            text-align: center;
+            animation: glitch 1s linear infinite, float 3s ease-in-out infinite;
+            margin-bottom: 40px;
+            text-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000;
+        }
+
+        @keyframes glitch {
+            2%, 64% { transform: translate(2px, 0) skew(0deg); }
+            4%, 60% { transform: translate(-2px, 0) skew(0deg); }
+            62% { transform: translate(0, 0) skew(5deg); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .terminal-form {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(0, 255, 0, 0.4);
+            width: 100%;
+            max-width: 450px;
+            border: 3px solid #00ff00;
+            backdrop-filter: blur(5px);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        label {
+            color: #00ff00;
+            text-shadow: 0 0 8px #00ff00;
+            display: block;
+            margin-bottom: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #111;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            font-family: 'Orbitron', sans-serif;
+            border-radius: 8px;
+            box-shadow: inset 0 0 8px #00ff00;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 15px #00ff00;
+            transform: scale(1.02);
+        }
+
+        .paste-btn, button {
+            padding: 10px;
+            background: #00ff00;
+            border: none;
+            color: #000;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px 0;
+        }
+
+        .paste-btn:hover, button:hover {
+            box-shadow: 0 0 20px #00ff00;
+            transform: translateY(-3px) scale(1.05);
+        }
+
+        #response {
+            margin-top: 20px;
+            color: #00ff00;
+            text-align: center;
+            text-shadow: 0 0 15px #00ff00;
+            animation: glow 1.5s ease-in-out infinite alternate;
+            white-space: pre-wrap;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00; }
+            to { text-shadow: 0 0 15px #00ff00, 0 0 30px #00ff00; }
+        }
+
+        .lock-btn {
+            background: #ff00ff;
+            width: 100%;
+        }
+
+        @media (max-width: 480px) {
+            .terminal-form {
+                padding: 20px;
+            }
+            .glitch {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="vanta-bg"></div>
+    <div class="container">
+        <div>
+            <h1 class="glitch">HACKER CORE v4.3</h1>
+            <div class="terminal-form">
+                <form id="hacker-form">
+                    <div class="input-group">
+                        <label>UID:</label>
+                        <input type="text" id="uid" required placeholder="Enter or Paste UID">
+                        <button type="button" class="paste-btn" onclick="pasteUID()">PASTE UID</button>
+                    </div>
+                    <div class="input-group">
+                        <label>VIP Key:</label>
+                        <input type="text" id="vipkey" required placeholder="Enter VIP Key">
+                        <button type="button" class="paste-btn lock-btn" onclick="lockKey()">LOCK KEY</button>
+                    </div>
+                    <button type="submit">ACTIVATE</button>
+                </form>
+                <div id="response"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        VANTA.NET({
+            el: "#vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x00ff00,
+            backgroundColor: 0x0a0a0a,
+            points: 12.00,
+            maxDistance: 25.00,
+            spacing: 20.00
+        });
+
+        let lockedKey = localStorage.getItem('lockedKey') || null;
+        if (lockedKey) {
+            document.getElementById('vipkey').value = lockedKey;
+            document.getElementById('vipkey').disabled = true;
+        }
+
+        function pasteUID() {
+            navigator.clipboard.readText()
+                .then(text => {
+                    document.getElementById('uid').value = text;
+                })
+                .catch(err => {
+                    document.getElementById('response').textContent = '❌ Paste failed: ' + err;
+                });
+        }
+
+        function lockKey() {
+            const vipkeyInput = document.getElementById('vipkey');
+            if (!lockedKey && vipkeyInput.value) {
+                lockedKey = vipkeyInput.value;
+                localStorage.setItem('lockedKey', lockedKey);
+                vipkeyInput.disabled = true;
+                document.getElementById('response').textContent = '🔒 VIP Key Locked Successfully!';
+            }
+        }
+
+        document.getElementById('hacker-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const uid = document.getElementById('uid').value;
+            const vipkey = lockedKey || document.getElementById('vipkey').value;
+            const responseDiv = document.getElementById('response');
+            
+            responseDiv.textContent = 'Initializing connection...';
+            
+            // Define url outside the try block so it's accessible in catch
+            const url = `https://ffob48.vercel.app/like?uid=${encodeURIComponent(uid)}&server_name=ind&vipkey=${encodeURIComponent(vipkey)}`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    mode: 'cors'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}`);
+                }
+                
+                const api_data = await response.json();
+                
+                let response_text = "";
+
+                // Check for error response (Invalid Key/UID)
+                if (api_data.error) {
+                    response_text = `❌ Failed to send likes to UID: ${uid}\nError: ${api_data.error}`;
+                    responseDiv.textContent = response_text;
+                    responseDiv.style.color = '#ff0000';
+                    responseDiv.style.textShadow = '0 0 10px #ff0000';
+                    setTimeout(() => {
+                        responseDiv.style.color = '#00ff00';
+                        responseDiv.style.textShadow = '0 0 10px #00ff00';
+                    }, 2000);
+                    return;
+                }
+
+                // Handle API response based on LikesGivenByAPI and status
+                if ('LikesGivenByAPI' in api_data) {
+                    if (api_data.LikesGivenByAPI === 0 && api_data.status === 2) {
+                        response_text = `❌ UID ${uid} in region ind has already received Max Likes for Today.\nPlease try again tomorrow or use a different UID.\n\n`;
+                        response_text += `👤 NAME: ${api_data.PlayerNickname || 'N/A'}\n`;
+                        response_text += `🆔 UID: ${uid}\n`;
+                        response_text += `🌐 REGION: ind 🇮🇳\n`;
+                        response_text += `👍 LIKES SENDED: ${api_data.LikesGivenByAPI}\n`;
+                        response_text += `♨️ LIKES BEFORE: ${api_data.LikesbeforeCommand || 'N/A'}\n`;
+                        response_text += `🌠 LIKES AFTER: ${api_data.LikesafterCommand || 'N/A'}\n`;
+                        response_text += "👾 BOT WAS MADE BY: @vipbhai0029";
+                    } else if (api_data.LikesGivenByAPI > 0 && api_data.status === 1) {
+                        response_text = "✨ LIKE SENDED SUCCESS ✨\n\n";
+                        response_text += `👤 NAME: ${api_data.PlayerNickname || 'N/A'}\n`;
+                        response_text += `🆔 UID: ${uid}\n`;
+                        response_text += `🌐 REGION: ind 🇮🇳\n`;
+                        response_text += `👍 LIKES SENDED: ${api_data.LikesGivenByAPI}\n`;
+                        response_text += `♨️ LIKES BEFORE: ${api_data.LikesbeforeCommand || 'N/A'}\n`;
+                        response_text += `🌠 LIKES AFTER: ${api_data.LikesafterCommand || 'N/A'}\n`;
+                        response_text += "☘️ API RUN: SUCCESS\n\n";
+                        response_text += "👾 BOT WAS MADE BY: @vipbhai0029";
+                    } else {
+                        response_text = "❌ Unexpected API response status.\nReceived: " + JSON.stringify(api_data, null, 2);
+                    }
+                } else {
+                    response_text = "❌ Invalid API response format.\nReceived: " + JSON.stringify(api_data, null, 2);
+                }
+                
+                responseDiv.textContent = response_text;
+                
+            } catch (error) {
+                let errorMsg = "❌ ERROR: ";
+                if (error.message.includes("Failed to fetch")) {
+                    errorMsg += "Unable to connect to API due to CORS or network issues.\n";
+                    errorMsg += "URL attempted: " + url + "\n";
+                    errorMsg += "Suggestion: Host this file on a web server (e.g., GitHub Pages, Vercel) to resolve CORS issues.";
+                } else {
+                    errorMsg += error.message;
+                }
+                responseDiv.textContent = errorMsg;
+                responseDiv.style.color = '#ff0000';
+                responseDiv.style.textShadow = '0 0 10px #ff0000';
+                setTimeout(() => {
+                    responseDiv.style.color = '#00ff00';
+                    responseDiv.style.textShadow = '0 0 10px #00ff00';
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>
