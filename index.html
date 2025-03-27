@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hacker Terminal v5.0</title>
+    <title>Hacker Terminal v5.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
@@ -200,7 +200,7 @@
     <div id="vanta-bg"></div>
     <div class="container">
         <div>
-            <h1 class="glitch">HACKER CORE v5.0</h1>
+            <h1 class="glitch">HACKER CORE v5.1</h1>
             <div class="terminal-form">
                 <form id="hacker-form">
                     <div class="input-group">
@@ -295,15 +295,17 @@
             responseDiv.textContent = 'Initializing connection...';
             responseDiv.className = 'response-warning';
             
-            const url = `https://ffob48.vercel.app/like?uid=${encodeURIComponent(uid)}&server_name=ind&vipkey=${encodeURIComponent(vipkey)}`;
+            // Use CORS proxy to bypass CORS issue
+            const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+            const apiUrl = `https://ffob48.vercel.app/like?uid=${encodeURIComponent(uid)}&server_name=ind&vipkey=${encodeURIComponent(vipkey)}`;
+            const url = proxyUrl + apiUrl;
             
             try {
                 const response = await fetch(url, {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json'
-                    },
-                   
+                    }
                 });
                 
                 if (!response.ok) {
@@ -358,9 +360,9 @@
             } catch (error) {
                 let errorMsg = "❌ ERROR: ";
                 if (error.message.includes("Failed to fetch")) {
-                    errorMsg += "Unable to connect to API due to CORS or network issues.\n";
-                    errorMsg += "URL attempted: " + url + "\n";
-                    errorMsg += "Suggestion: This should work now that you're hosting on GitHub Pages.";
+                    errorMsg += "Unable to connect to API.\n";
+                    errorMsg += "URL attempted: " + apiUrl + "\n";
+                    errorMsg += "The CORS proxy might be down or rate-limited. Try deploying on GitHub Pages and using a different proxy if needed.";
                 } else {
                     errorMsg += error.message;
                 }
