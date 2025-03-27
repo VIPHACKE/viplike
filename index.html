@@ -295,9 +295,7 @@
             responseDiv.textContent = 'Initializing connection...';
             responseDiv.className = 'response-warning';
             
-            const proxyUrl = 'https://corsproxy.io/?';
-           const apiUrl = `https://ffob48.vercel.app/like?uid=${encodeURIComponent(uid)}&server_name=ind&vipkey=${encodeURIComponent(vipkey)}`;
-           const response = await fetch(proxyUrl + apiUrl);
+            const url = `https://ffob48.vercel.app/like?uid=${encodeURIComponent(uid)}&server_name=ind&vipkey=${encodeURIComponent(vipkey)}`;
             
             try {
                 const response = await fetch(url, {
