@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker Terminal v5.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0a0a0a;
+            font-family: 'Orbitron', sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        #vanta-bg {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .glitch {
+            color: #ff0000;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            text-align: center;
+            animation: glitch 0.8s linear infinite, float 3s ease-in-out infinite, neon 1.5s ease-in-out infinite alternate;
+            margin-bottom: 40px;
+            text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 60px #ff0000;
+        }
+
+        @keyframes glitch {
+            2%, 64% { transform: translate(3px, 0) skew(0deg); }
+            4%, 60% { transform: translate(-3px, 0) skew(0deg); }
+            62% { transform: translate(0, 0) skew(6deg); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotateX(10deg) rotateY(10deg); }
+            50% { transform: translateY(-30px) rotateX(-10deg) rotateY(-10deg); }
+        }
+
+        @keyframes neon {
+            from { text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 40px #ff0000; }
+            to { text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 80px #ff0000; }
+        }
+
+        .terminal-form {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5), inset 0 0 15px rgba(0, 255, 0, 0.3);
+            width: 100%;
+            max-width: 450px;
+            border: 3px solid #00ff00;
+            backdrop-filter: blur(8px);
+            transform: perspective(1000px) rotateX(5deg);
+            transition: transform 0.5s;
+        }
+
+        .terminal-form:hover {
+            transform: perspective(1000px) rotateX(0deg);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        label {
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+            display: block;
+            margin-bottom: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #111;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            font-family: 'Orbitron', sans-serif;
+            border-radius: 8px;
+            box-shadow: inset 0 0 10px #00ff00, 0 0 15px #00ff00;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            box-shadow: inset 0 0 15px #00ff00, 0 0 25px #00ff00;
+            transform: scale(1.03);
+        }
+
+        .paste-btn, button, .lock-btn {
+            padding: 10px;
+            background: #00ff00;
+            border: none;
+            color: #000;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px 0;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        .paste-btn:hover, button:hover, .lock-btn:hover {
+            box-shadow: 0 0 25px #00ff00;
+            transform: translateY(-3px) scale(1.05);
+        }
+
+        .lock-btn {
+            background: #ff00ff;
+            width: 100%;
+        }
+
+        .lock-btn.unlocked {
+            background: #ff5555;
+        }
+
+        #response {
+            margin-top: 20px;
+            text-align: center;
+            white-space: pre-wrap;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .response-success {
+            color: #00ff00;
+            text-shadow: 0 0 15px #00ff00, 0 0 30px #00ff00;
+            animation: glowSuccess 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes glowSuccess {
+            from { text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00; }
+            to { text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00; }
+        }
+
+        .response-error {
+            color: #ff0000;
+            text-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000;
+            animation: glowError 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes glowError {
+            from { text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; }
+            to { text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000; }
+        }
+
+        .response-warning {
+            color: #ffaa00;
+            text-shadow: 0 0 15px #ffaa00, 0 0 30px #ffaa00;
+            animation: glowWarning 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes glowWarning {
+            from { text-shadow: 0 0 10px #ffaa00, 0 0 20px #ffaa00; }
+            to { text-shadow: 0 0 20px #ffaa00, 0 0 40px #ffaa00; }
+        }
+
+        @media (max-width: 480px) {
+            .terminal-form {
+                padding: 20px;
+            }
+            .glitch {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="vanta-bg"></div>
+    <div class="container">
+        <div>
+            <h1 class="glitch">HACKER CORE v5.0</h1>
+            <div class="terminal-form">
+                <form id="hacker-form">
+                    <div class="input-group">
+                        <label>UID:</label>
+                        <input type="text" id="uid" required placeholder="Enter or Paste UID">
+                        <button type="button" class="paste-btn" onclick="pasteUID()">PASTE UID</button>
+                    </div>
+                    <div class="input-group">
+                        <label>VIP Key:</label>
+                        <input type="text" id="vipkey" required placeholder="Enter VIP Key">
+                        <button type="button" class="lock-btn" id="lock-btn" onclick="toggleLockKey()">LOCK KEY</button>
+                    </div>
+                    <button type="submit">ACTIVATE</button>
+                </form>
+                <div id="response"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        VANTA.NET({
+            el: "#vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x00ff00,
+            backgroundColor: 0x0a0a0a,
+            points: 15.00,
+            maxDistance: 30.00,
+            spacing: 25.00,
+            showDots: true
+        });
+
+        let lockedKey = localStorage.getItem('lockedKey') || null;
+        const vipkeyInput = document.getElementById('vipkey');
+        const lockBtn = document.getElementById('lock-btn');
+
+        if (lockedKey) {
+            vipkeyInput.value = lockedKey;
+            vipkeyInput.disabled = true;
+            lockBtn.textContent = 'UNLOCK KEY';
+            lockBtn.classList.add('unlocked');
+        }
+
+        function pasteUID() {
+            navigator.clipboard.readText()
+                .then(text => {
+                    document.getElementById('uid').value = text;
+                })
+                .catch(err => {
+                    const responseDiv = document.getElementById('response');
+                    responseDiv.textContent = '❌ Paste failed: ' + err;
+                    responseDiv.className = 'response-error';
+                });
+        }
+
+        function toggleLockKey() {
+            if (lockedKey) {
+                // Unlock
+                lockedKey = null;
+                localStorage.removeItem('lockedKey');
+                vipkeyInput.disabled = false;
+                lockBtn.textContent = 'LOCK KEY';
+                lockBtn.classList.remove('unlocked');
+                document.getElementById('response').textContent = '🔓 VIP Key Unlocked!';
+                document.getElementById('response').className = 'response-warning';
+            } else {
+                // Lock
+                if (vipkeyInput.value) {
+                    lockedKey = vipkeyInput.value;
+                    localStorage.setItem('lockedKey', lockedKey);
+                    vipkeyInput.disabled = true;
+                    lockBtn.textContent = 'UNLOCK KEY';
+                    lockBtn.classList.add('unlocked');
+                    document.getElementById('response').textContent = '🔒 VIP Key Locked Successfully!';
+                    document.getElementById('response').className = 'response-success';
+                }
+            }
+        }
+
+        document.getElementById('hacker-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const uid = document.getElementById('uid').value;
+            const vipkey = lockedKey || document.getElementById('vipkey').value;
+            const responseDiv = document.getElementById('response');
+            
+            responseDiv.textContent = 'Initializing connection...';
+            responseDiv.className = 'response-warning';
+            
+            const url = `https://ffob48.vercel.app/like?uid=${encodeURIComponent(uid)}&server_name=ind&vipkey=${encodeURIComponent(vipkey)}`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    mode: 'cors'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}`);
+                }
+                
+                const api_data = await response.json();
+                
+                let response_text = "";
+                let response_class = "";
+
+                // Check for error response (Invalid Key/UID)
+                if (api_data.error) {
+                    response_text = `❌ Failed to send likes to UID: ${uid}\nError: ${api_data.error}`;
+                    response_class = 'response-error';
+                }
+                // Handle API response based on LikesGivenByAPI and status
+                else if ('LikesGivenByAPI' in api_data) {
+                    if (api_data.LikesGivenByAPI === 0 && api_data.status === 2) {
+                        response_text = `❌ UID ${uid} in region ind has already received Max Likes for Today.\nPlease try again tomorrow or use a different UID.\n\n`;
+                        response_text += `👤 NAME: ${api_data.PlayerNickname || 'N/A'}\n`;
+                        response_text += `🆔 UID: ${uid}\n`;
+                        response_text += `🌐 REGION: ind 🇮🇳\n`;
+                        response_text += `👍 LIKES SENDED: ${api_data.LikesGivenByAPI}\n`;
+                        response_text += `♨️ LIKES BEFORE: ${api_data.LikesbeforeCommand || 'N/A'}\n`;
+                        response_text += `🌠 LIKES AFTER: ${api_data.LikesafterCommand || 'N/A'}\n`;
+                        response_text += "👾 BOT WAS MADE BY: @vipbhai0029";
+                        response_class = 'response-warning';
+                    } else if (api_data.LikesGivenByAPI > 0 && api_data.status === 1) {
+                        response_text = "✨ LIKE SENDED SUCCESS ✨\n\n";
+                        response_text += `👤 NAME: ${api_data.PlayerNickname || 'N/A'}\n`;
+                        response_text += `🆔 UID: ${uid}\n`;
+                        response_text += `🌐 REGION: ind 🇮🇳\n`;
+                        response_text += `👍 LIKES SENDED: ${api_data.LikesGivenByAPI}\n`;
+                        response_text += `♨️ LIKES BEFORE: ${api_data.LikesbeforeCommand || 'N/A'}\n`;
+                        response_text += `🌠 LIKES AFTER: ${api_data.LikesafterCommand || 'N/A'}\n`;
+                        response_text += "☘️ API RUN: SUCCESS\n\n";
+                        response_text += "👾 BOT WAS MADE BY: @vipbhai0029";
+                        response_class = 'response-success';
+                    } else {
+                        response_text = "❌ Unexpected API response status.\nReceived: " + JSON.stringify(api_data, null, 2);
+                        response_class = 'response-error';
+                    }
+                } else {
+                    response_text = "❌ Invalid API response format.\nReceived: " + JSON.stringify(api_data, null, 2);
+                    response_class = 'response-error';
+                }
+                
+                responseDiv.textContent = response_text;
+                responseDiv.className = response_class;
+                
+            } catch (error) {
+                let errorMsg = "❌ ERROR: ";
+                if (error.message.includes("Failed to fetch")) {
+                    errorMsg += "Unable to connect to API due to CORS or network issues.\n";
+                    errorMsg += "URL attempted: " + url + "\n";
+                    errorMsg += "Suggestion: This should work now that you're hosting on GitHub Pages.";
+                } else {
+                    errorMsg += error.message;
+                }
+                responseDiv.textContent = errorMsg;
+                responseDiv.className = 'response-error';
+            }
+        });
+    </script>
+</body>
+</html>
